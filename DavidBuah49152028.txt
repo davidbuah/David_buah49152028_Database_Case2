@@ -1,0 +1,356 @@
+Name: Buah Adom David
+ID: 49152028
+COHORT: B
+
+MariaDB [(none)]> create database work;
+Query OK, 1 row affected (0.016 sec)
+
+MariaDB [(none)]> use work;
+Database changed
+
+--Creating tables and adding the constraint
+MariaDB [work]> create table employee(empNo varchar(10) primary key not null, fName varchar(20) not null, lName varchar(20) not null, address varchar(30) not null, DOB date not null, sex char(1) not null, position varchar(20), deptNo int not null);
+Query OK, 0 rows affected (0.029 sec)
+
+MariaDB [work]> alter table employee add constraint chk_sex check(sex in('M','F'));
+Query OK, 0 rows affected (0.039 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [work]>  alter table employee add constraint chk_pos check(position in ('Manager','Team Leader','Analyst','Software Developer'));
+Query OK, 0 rows affected (0.050 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> create table department(deptNo varchar(20) primary key not null, deptName varchar(20) not null,mrgEmpNo varchar(20) not null, foreign key(mrgEmpNo) references employee(empNo));
+Query OK, 0 rows affected (0.031 sec)
+
+MariaDB [work]> create table project(projNo varchar(20) primary key not null, projName varchar(30) not null, deptNo varchar(20) not null, foreign key(deptNo) references department(deptNo));
+Query OK, 0 rows affected (0.016 sec)
+
+MariaDB [work]> create table worksOn(empNo varchar(20) not null references employee(empNo), projNo varchar(20) not null references project(projNo), dateWorked date not null, hoursWorked int not null, primary key(empNo,projNo,dateWorked));
+Query OK, 0 rows affected (0.011 sec)
+
+
+MariaDB [work]> alter table worksOn modify column hoursWorked int not null, add constraint chk_hoursWorked check(hoursWorked between 0 and 40);
+Query OK, 0 rows affected (0.048 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> alter table employee modify column deptNo varchar(20);
+Query OK, 0 rows affected (0.054 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> describe employee;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| empNo    | varchar(10) | NO   | PRI | NULL    |       |
+| fName    | varchar(20) | NO   |     | NULL    |       |
+| lName    | varchar(20) | NO   |     | NULL    |       |
+| address  | varchar(30) | NO   |     | NULL    |       |
+| DOB      | date        | NO   |     | NULL    |       |
+| sex      | char(1)     | NO   |     | NULL    |       |
+| position | varchar(20) | YES  |     | NULL    |       |
+| deptNo   | varchar(20) | YES  |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+8 rows in set (0.004 sec)
+
+MariaDB [work]> describe department;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| deptNo   | varchar(20) | NO   | PRI | NULL    |       |
+| deptName | varchar(20) | NO   |     | NULL    |       |
+| mrgEmpNo | varchar(20) | NO   | MUL | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+3 rows in set (0.009 sec)
+
+MariaDB [work]> describe project;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| projNo   | varchar(20) | NO   | PRI | NULL    |       |
+| projName | varchar(30) | NO   |     | NULL    |       |
+| deptNo   | varchar(20) | NO   | MUL | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+3 rows in set (0.025 sec)
+
+MariaDB [work]> describe worksOn;
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| empNo       | varchar(20) | NO   | PRI | NULL    |       |
+| projNo      | varchar(20) | NO   | PRI | NULL    |       |
+| dateWorked  | date        | NO   | PRI | NULL    |       |
+| hoursWorked | int(11)     | NO   |     | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+4 rows in set (0.007 sec)
+
+MariaDB [work]> INSERT INTO employee (empNo, fName, lName, address, DOB, sex, position, deptNo) VALUES
+    -> ('E001', 'Alice', 'Johnson', '123 Main St', '1985-03-15', 'F', 'Manager', 'D001'),
+    -> ('E002', 'Bob', 'Smith', '456 Oak Ave', '1982-07-22', 'M', 'Manager', 'D002'),
+    -> ('E003', 'Carol', 'Williams', '789 Pine Rd', '1990-11-05', 'F', 'Manager', 'D003'),
+    -> ('E004', 'David', 'Brown', '321 Elm St', '1988-04-12', 'M', 'Manager', 'D004'),
+    -> ('E005', 'Emma', 'Davis', '654 Maple Dr', '1992-09-30', 'F', 'Manager', 'D005'),
+    -> ('E006', 'Frank', 'Wilson', '987 Cedar Ln', '1995-01-18', 'M', 'Software Developer', 'D003'),
+    -> ('E007', 'Grace', 'Taylor', '135 Birch Blvd', '1993-06-25', 'F', 'Analyst', 'D002'),
+    -> ('E008', 'Henry', 'Anderson', '246 Spruce Way', '1991-12-10', 'M', 'Team Leader', 'D003'),
+    -> ('E009', 'Ivy', 'Thomas', '357 Walnut Ct', '1994-08-14', 'F', 'Software Developer', 'D003'),
+    -> ('E010', 'Jack', 'Martinez', '468 Ash Rd', '1987-05-03', 'M', 'Analyst', 'D004');
+Query OK, 10 rows affected (0.005 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> INSERT INTO department (deptNo, deptName, mrgEmpNo) VALUES
+    -> ('D001', 'Human Resources', 'E001'),
+    -> ('D002', 'Finance', 'E002'),
+    -> ('D003', 'IT', 'E003'),
+    -> ('D004', 'Marketing', 'E004'),
+    -> ('D005', 'Operations', 'E005');
+Query OK, 5 rows affected (0.001 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> INSERT INTO project (projNo, projName, deptNo) VALUES
+    -> ('P001', 'Employee Portal Upgrade', 'D003'),
+    -> ('P002', 'Financial Reporting System', 'D002'),
+    -> ('P003', 'Marketing Campaign 2026', 'D004'),
+    -> ('P004', 'HR Payroll Automation', 'D001'),
+    -> ('P005', 'Network Infrastructure Refresh', 'D003'),
+    -> ('P006', 'Customer Analytics Dashboard', 'D004');
+Query OK, 6 rows affected (0.020 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> INSERT INTO worksOn (empNo, projNo, dateWorked, hoursWorked) VALUES
+    -> ('E006', 'P001', '2026-06-01', 8),
+    -> ('E008', 'P001', '2026-06-01', 7),
+    -> ('E009', 'P001', '2026-06-02', 6),
+    -> ('E007', 'P002', '2026-06-01', 5),
+    -> ('E007', 'P002', '2026-06-02', 8),
+    -> ('E010', 'P003', '2026-06-03', 4),
+    -> ('E006', 'P005', '2026-06-03', 9),
+    -> ('E008', 'P005', '2026-06-04', 8),
+    -> ('E009', 'P001', '2026-06-04', 7),
+    -> ('E003', 'P001', '2026-06-05', 3),
+    -> ('E001', 'P004', '2026-06-05', 6),
+    -> ('E004', 'P006', '2026-06-06', 5);
+Query OK, 12 rows affected (0.020 sec)
+Records: 12  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> select * from employee;
++-------+-------+----------+----------------+------------+-----+--------------------+--------+
+| empNo | fName | lName    | address        | DOB        | sex | position           | deptNo |
++-------+-------+----------+----------------+------------+-----+--------------------+--------+
+| E001  | Alice | Johnson  | 123 Main St    | 1985-03-15 | F   | Manager            | D001   |
+| E002  | Bob   | Smith    | 456 Oak Ave    | 1982-07-22 | M   | Manager            | D002   |
+| E003  | Carol | Williams | 789 Pine Rd    | 1990-11-05 | F   | Manager            | D003   |
+| E004  | David | Brown    | 321 Elm St     | 1988-04-12 | M   | Manager            | D004   |
+| E005  | Emma  | Davis    | 654 Maple Dr   | 1992-09-30 | F   | Manager            | D005   |
+| E006  | Frank | Wilson   | 987 Cedar Ln   | 1995-01-18 | M   | Software Developer | D003   |
+| E007  | Grace | Taylor   | 135 Birch Blvd | 1993-06-25 | F   | Analyst            | D002   |
+| E008  | Henry | Anderson | 246 Spruce Way | 1991-12-10 | M   | Team Leader        | D003   |
+| E009  | Ivy   | Thomas   | 357 Walnut Ct  | 1994-08-14 | F   | Software Developer | D003   |
+| E010  | Jack  | Martinez | 468 Ash Rd     | 1987-05-03 | M   | Analyst            | D004   |
++-------+-------+----------+----------------+------------+-----+--------------------+--------+
+10 rows in set (0.000 sec)
+
+MariaDB [work]> select * from department;
++--------+-----------------+----------+
+| deptNo | deptName        | mrgEmpNo |
++--------+-----------------+----------+
+| D001   | Human Resources | E001     |
+| D002   | Finance         | E002     |
+| D003   | IT              | E003     |
+| D004   | Marketing       | E004     |
+| D005   | Operations      | E005     |
++--------+-----------------+----------+
+5 rows in set (0.001 sec)
+
+MariaDB [work]> select * from project;
++--------+--------------------------------+--------+
+| projNo | projName                       | deptNo |
++--------+--------------------------------+--------+
+| P001   | Employee Portal Upgrade        | D003   |
+| P002   | Financial Reporting System     | D002   |
+| P003   | Marketing Campaign 2026        | D004   |
+| P004   | HR Payroll Automation          | D001   |
+| P005   | Network Infrastructure Refresh | D003   |
+| P006   | Customer Analytics Dashboard   | D004   |
++--------+--------------------------------+--------+
+6 rows in set (0.001 sec)
+
+MariaDB [work]> select * from worksOn;
++-------+--------+------------+-------------+
+| empNo | projNo | dateWorked | hoursWorked |
++-------+--------+------------+-------------+
+| E001  | P004   | 2026-06-05 |           6 |
+| E003  | P001   | 2026-06-05 |           3 |
+| E004  | P006   | 2026-06-06 |           5 |
+| E006  | P001   | 2026-06-01 |           8 |
+| E006  | P005   | 2026-06-03 |           9 |
+| E007  | P002   | 2026-06-01 |           5 |
+| E007  | P002   | 2026-06-02 |           8 |
+| E008  | P001   | 2026-06-01 |           7 |
+| E008  | P005   | 2026-06-04 |           8 |
+| E009  | P001   | 2026-06-02 |           6 |
+| E009  | P001   | 2026-06-04 |           7 |
+| E010  | P003   | 2026-06-03 |           4 |
++-------+--------+------------+-------------+
+12 rows in set (0.000 sec)
+
+
+--Question 7.25
+MariaDB [work]> create view female_manager_projects as select p.projNo,p.projName,p.deptNo from project p join department d on p.deptNo=d.deptNo join employee e on d.mrgEmpNo=e.empNo where e.sex='F' and e.position='Manager' order by p.projNo;
+Query OK, 0 rows affected (0.026 sec)
+
+MariaDB [work]> select * from female_manager_projects;
++--------+--------------------------------+--------+
+| projNo | projName                       | deptNo |
++--------+--------------------------------+--------+
+| P001   | Employee Portal Upgrade        | D003   |
+| P004   | HR Payroll Automation          | D001   |
+| P005   | Network Infrastructure Refresh | D003   |
++--------+--------------------------------+--------+
+3 rows in set (0.001 sec)
+
+
+--Question 7.26
+MariaDB [work]> create view employee_description as select e.empNo, e.fName,e.lName,p.projName,w.hoursWorked from employee e join project p on p.deptNo=e.deptNo join worksOn w on w.empNo=e.empNo order by e.empNo;
+Query OK, 0 rows affected (0.023 sec)
+
+MariaDB [work]> select * from employee_description;
++-------+-------+----------+--------------------------------+-------------+
+| empNo | fName | lName    | projName                       | hoursWorked |
++-------+-------+----------+--------------------------------+-------------+
+| E001  | Alice | Johnson  | HR Payroll Automation          |           6 |
+| E003  | Carol | Williams | Employee Portal Upgrade        |           3 |
+| E003  | Carol | Williams | Network Infrastructure Refresh |           3 |
+| E004  | David | Brown    | Marketing Campaign 2026        |           5 |
+| E004  | David | Brown    | Customer Analytics Dashboard   |           5 |
+| E006  | Frank | Wilson   | Employee Portal Upgrade        |           8 |
+| E006  | Frank | Wilson   | Network Infrastructure Refresh |           8 |
+| E006  | Frank | Wilson   | Employee Portal Upgrade        |           9 |
+| E006  | Frank | Wilson   | Network Infrastructure Refresh |           9 |
+| E007  | Grace | Taylor   | Financial Reporting System     |           5 |
+| E007  | Grace | Taylor   | Financial Reporting System     |           8 |
+| E008  | Henry | Anderson | Employee Portal Upgrade        |           7 |
+| E008  | Henry | Anderson | Network Infrastructure Refresh |           7 |
+| E008  | Henry | Anderson | Employee Portal Upgrade        |           8 |
+| E008  | Henry | Anderson | Network Infrastructure Refresh |           8 |
+| E009  | Ivy   | Thomas   | Employee Portal Upgrade        |           6 |
+| E009  | Ivy   | Thomas   | Network Infrastructure Refresh |           6 |
+| E009  | Ivy   | Thomas   | Employee Portal Upgrade        |           7 |
+| E009  | Ivy   | Thomas   | Network Infrastructure Refresh |           7 |
+| E010  | Jack  | Martinez | Marketing Campaign 2026        |           4 |
+| E010  | Jack  | Martinez | Customer Analytics Dashboard   |           4 |
++-------+-------+----------+--------------------------------+-------------+
+21 rows in set (0.021 sec)
+
+
+--Question 7.27
+MariaDB [work]> create view EmpProject(empNo, projNo, totalHours) as select w.empNo, w.projNo, sum(w.hoursWorked) as totalHours from WorksOn w join Employee e on e.empNo = w.empNo join Project p on p.projNo = w.projNo group by w.empNo, w.projNo;
+Query OK, 0 rows affected (0.007 sec)
+
+--Question 7.27 a)
+MariaDB [work]> select * from EmpProject;
++-------+--------+------------+
+| empNo | projNo | totalHours |
++-------+--------+------------+
+| E001  | P004   |          6 |
+| E003  | P001   |          3 |
+| E004  | P006   |          5 |
+| E006  | P001   |          8 |
+| E006  | P005   |          9 |
+| E007  | P002   |         13 |
+| E008  | P001   |          7 |
+| E008  | P005   |          8 |
+| E009  | P001   |         13 |
+| E010  | P003   |          4 |
++-------+--------+------------+
+10 rows in set (0.001 sec)
+
+--Question 7.27 b)
+MariaDB [work]> select projNo from EmpProject where projNo='SCCS';
+Empty set (0.001 sec)
+
+
+--Quetion 7.27 c)
+MariaDB [work]> select count(projNo) from EmpProject where empNo='E1';
++---------------+
+| count(projNo) |
++---------------+
+|             0 |
++---------------+
+1 row in set (0.001 sec)
+
+
+MariaDB [work]> select empNo, totalHours from EmpProject group by empNo;
++-------+------------+
+| empNo | totalHours |
++-------+------------+
+| E001  |          6 |
+| E003  |          3 |
+| E004  |          5 |
+| E006  |          8 |
+| E007  |         13 |
+| E008  |          7 |
+| E009  |         13 |
+| E010  |          4 |
++-------+------------+
+8 rows in set (0.002 sec)
+
+
+General	
+
+MariaDB [work]> create table part(partNo varchar(10), contract varchar(10), partCost decimal(8,2), primary key(partNo, contract));
+Query OK, 0 rows affected (0.014 sec)
+
+MariaDB [work]> describe part;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| partNo   | varchar(10)  | NO   | PRI | NULL    |       |
+| contract | varchar(10)  | NO   | PRI | NULL    |       |
+| partCost | decimal(8,2) | YES  |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+3 rows in set (0.021 sec)
+
+MariaDB [work]> INSERT INTO part (partNo, contract, partCost) VALUES
+    -> ('P001', 'C100', 125.50),
+    -> ('P001', 'C101', 132.75),
+    -> ('P002', 'C100', 89.99),
+    -> ('P002', 'C102', 95.25),
+    -> ('P003', 'C103', 245.00),
+    -> ('P004', 'C100', 67.80),
+    -> ('P004', 'C104', 72.15),
+    -> ('P005', 'C101', 189.99),
+    -> ('P006', 'C105', 45.50),
+    -> ('P007', 'C100', 310.00);
+Query OK, 10 rows affected (0.002 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+MariaDB [work]> select * from part;
++--------+----------+----------+
+| partNo | contract | partCost |
++--------+----------+----------+
+| P001   | C100     |   125.50 |
+| P001   | C101     |   132.75 |
+| P002   | C100     |    89.99 |
+| P002   | C102     |    95.25 |
+| P003   | C103     |   245.00 |
+| P004   | C100     |    67.80 |
+| P004   | C104     |    72.15 |
+| P005   | C101     |   189.99 |
+| P006   | C105     |    45.50 |
+| P007   | C100     |   310.00 |
++--------+----------+----------+
+10 rows in set (0.001 sec)
+
+
+MariaDB [work]> create view ExpensiveParts(partNo) as select distinct partNo from part where partCost>1000;
+Query OK, 0 rows affected (0.008 sec)
+
+MariaDB [work]> select * from ExpensiveParts;
+Empty set (0.017 sec)
+
+
+General Question
+A materialized view stores the results of a query rather than just the query itself. As a result, it must be updated whenever the Part table changes. When a new row is inserted with a partCost greater than 1000, the corresponding partNo is added to the materialized view. If a row is updated and its partCost increases above 1000, the partNo is also added. However, if the cost drops to 1000 or below, the database must first check whether the same partNo has any other contracts with a partCost greater than 1000 before removing it from the view. Likewise, when a row is deleted, the partNo is removed only if there are no remaining contracts for that part with a cost above 1000.
+
+In some cases, the materialized view can be updated without consulting the Part table. For example, when a newly inserted row has a partCost greater than 1000, the partNo can be added directly because the change cannot affect other records. However, when a row with a partCost above 1000 is updated or deleted, the Part table must be checked to determine whether another qualifying contract for the same partNo still exists before removing it from the materialized view.
